@@ -1,9 +1,10 @@
 services:
-  qbittorrent-nox:
+  qbittorrent-ut-nox:
+    build: .
     # for debugging
     #cap_add:
       #- SYS_PTRACE
-    container_name: qbittorrent-nox
+    container_name: qbittorrent-ut-nox
     environment:
       #- PAGID=10000
       #- PGID=1000
@@ -13,7 +14,7 @@ services:
       - QBT_WEBUI_PORT=${QBT_WEBUI_PORT}
       #- TZ=UTC
       #- UMASK=022
-    image: qbittorrentofficial/qbittorrent-nox:${QBT_VERSION}
+    image: qbittorrent-ut-nox:${QBT_VERSION}
     ports:
       # for bittorrent traffic
       - 6881:6881/tcp

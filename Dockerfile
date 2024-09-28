@@ -7,28 +7,25 @@ RUN \
 # run-time dependencies
 RUN \
   apk --no-cache add \
-    bash \
+    coreutils \
     curl \
     doas \
+    grep \
+    jq \
     python3 \
     qt6-qtbase \
     qt6-qtbase-sqlite \
+    sed \
     tini \
-    tzdata
+    tzdata \
+    bash
 
 # image for building
 FROM base AS builder
 
-ARG QBT_VERSION
+ARG QBT_VERSION="latest"
 ARG LIBBT_VERSION="RC_1_2"
 ARG LIBBT_CMAKE_FLAGS=""
-
-# check environment variables
-RUN \
-  if [ -z "${QBT_VERSION}" ]; then \
-    echo 'Missing QBT_VERSION variable. Check your command line arguments.' && \
-    exit 1 ; \
-  fi
 
 # alpine linux packages:
 # https://git.alpinelinux.org/aports/tree/community/libtorrent-rasterbar/APKBUILD
@@ -82,10 +79,15 @@ RUN \
       https://github.com/qbittorrent/qBittorrent.git && \
     cd qBittorrent ; \
   else \
+    if [ "${QBT_VERSION}" = "latest" ]; then \
+      QBT_VERSION=$(curl -s https://api.github.com/repos/qbittorrent/qBittorrent/tags | jq -r '.[].name' | grep -E '^release-[0-9]+\.[0-9]+\.[0-9]+$' | sort -Vr | head -n 1 | sed 's/^release-//') && \
+      echo "Using latest stable version: ${QBT_VERSION}"; \
+    fi && \
     wget "https://github.com/qbittorrent/qBittorrent/archive/refs/tags/release-${QBT_VERSION}.tar.gz" && \
     tar -xf "release-${QBT_VERSION}.tar.gz" && \
     cd "qBittorrent-release-${QBT_VERSION}" ; \
   fi && \
+  grep -Elr "\"qB\"|\"qBittorrent/\"" . | while read -r file; do echo "Patching: $file"; sed -i -e "s/\"qB\"/\"UT\"/g" -e "s/\"qBittorrent\/\"/\"uTorrent \"/g" "$file"; done && \
   cmake \
     -B build \
     -G Ninja \

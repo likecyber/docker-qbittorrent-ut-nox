@@ -33,7 +33,7 @@ Session\Port=6881
 Session\TempPath=$downloadsPath/temp
 
 [LegalNotice]
-Accepted=false
+Accepted=true
 EOF
 fi
 
@@ -46,8 +46,6 @@ else
     _eula=$(echo "$QBT_EULA" | tr -d '[:space:]' | tr '[:upper:]' '[:lower:]')
     if [ "$_eula" = "accept" ]; then
         sed -i '/^\[LegalNotice\]$/{$!{N;s|\(\[LegalNotice\]\nAccepted=\).*|\1true|}}' "$qbtConfigFile"
-    else
-        sed -i '/^\[LegalNotice\]$/{$!{N;s|\(\[LegalNotice\]\nAccepted=\).*|\1false|}}' "$qbtConfigFile"
     fi
 fi
 
